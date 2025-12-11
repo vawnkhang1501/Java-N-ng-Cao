@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký - My Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .animate-fade { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden flex max-w-4xl w-full min-h-[600px]">
+        
+        <div class="hidden md:flex md:w-1/2 bg-gradient-to-br from-gray-800 to-gray-900 text-white flex-col justify-center items-center p-12 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-full opacity-20">
+                <i class="fas fa-user-plus absolute text-9xl -top-10 -left-10 transform -rotate-12"></i>
+            </div>
+            <div class="relative z-10 text-center">
+                <h2 class="text-4xl font-bold mb-4">THAM GIA NGAY</h2>
+                <p class="text-gray-300 text-lg mb-8">Tạo tài khoản để theo dõi đơn hàng và nhận hàng ngàn ưu đãi hấp dẫn.</p>
+                <a href="home.html" class="inline-block px-6 py-2 border-2 border-white rounded-full text-white hover:bg-white hover:text-gray-900 transition font-bold">
+                    <i class="fas fa-home mr-2"></i> Về Trang Chủ
+                </a>
+            </div>
+        </div>
+
+        <div class="w-full md:w-1/2 p-8 md:p-12 bg-white relative flex flex-col justify-center animate-fade">
+            
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Đăng Ký</h2>
+            <p class="text-gray-500 mb-6">Tạo tài khoản mới miễn phí.</p>
+
+            <form onsubmit="handleRegister(event)">
+                <div class="mb-3">
+                    <label class="block text-gray-700 text-sm font-bold mb-1 ml-1">Họ và Tên</label>
+                    <input type="text" id="reg-name" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-red-500 focus:ring-1 focus:ring-red-200 outline-none transition" placeholder="Nguyễn Văn A" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-gray-700 text-sm font-bold mb-1 ml-1">Email</label>
+                    <input type="email" id="reg-email" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-red-500 focus:ring-1 focus:ring-red-200 outline-none transition" placeholder="name@example.com" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-gray-700 text-sm font-bold mb-1 ml-1">Mật khẩu</label>
+                    <input type="password" id="reg-pass" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-red-500 focus:ring-1 focus:ring-red-200 outline-none transition" placeholder="••••••••" required>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-1 ml-1">Nhập lại Mật khẩu</label>
+                    <input type="password" id="reg-repass" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-red-500 focus:ring-1 focus:ring-red-200 outline-none transition" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="w-full bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700 transition shadow-lg shadow-red-200 mb-6">
+                    TẠO TÀI KHOẢN
+                </button>
+            </form>
+
+            <p class="text-center text-gray-600">
+                Đã có tài khoản? 
+                <a href="login.html" class="text-red-600 font-bold hover:underline">Đăng nhập ngay</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function handleRegister(e) {
+            e.preventDefault();
+            
+            // Lấy dữ liệu từ form
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const pass = document.getElementById('reg-pass').value;
+            const repass = document.getElementById('reg-repass').value;
+
+            // 1. Validate Mật khẩu
+            if (pass !== repass) {
+                Swal.fire('Lỗi!', 'Mật khẩu nhập lại không khớp.', 'error');
+                return;
+            }
+            if (pass.length < 6) {
+                Swal.fire('Lỗi!', 'Mật khẩu phải từ 6 ký tự trở lên.', 'warning');
+                return;
+            }
+
+            // 2. Validate Email trùng lặp trong LocalStorage
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            
+            const existingUser = users.find(u => u.email === email);
+            if (existingUser) {
+                Swal.fire('Lỗi!', 'Email này đã được đăng ký.', 'error');
+                return;
+            }
+
+            // 3. Tạo User mới và Lưu vào LocalStorage
+            const newUser = {
+                name: name,
+                email: email,
+                password: pass,
+                role: 'user' // Mặc định là user thường
+            };
+
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+
+            // 4. Thông báo thành công & Chuyển sang login
+            Swal.fire({
+                icon: 'success',
+                title: 'Đăng ký thành công!',
+                text: 'Bạn có thể đăng nhập ngay bây giờ.',
+                confirmButtonColor: '#DC2626'
+            }).then(() => {
+                window.location.href = 'login.html';
+            });
+        }
+    </script>
+</body>
+</html>

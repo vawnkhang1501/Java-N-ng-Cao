@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ Hàng - Laptop Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { primary: '#DC2626', secondary: '#F3F4F6' } }
+            }
+        }
+    </script>
+</head>
+<body class="bg-secondary font-sans antialiased flex flex-col min-h-screen">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <a href="home.html" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 bg-primary text-white rounded flex items-center justify-center text-xl font-bold">L</div>
+                    <span class="text-2xl font-bold text-primary">LAPTOP STORE</span>
+                </a>
+                
+                <nav class="hidden md:flex space-x-8">
+                    <a href="home.html" class="text-gray-600 hover:text-primary font-medium transition">Trang Chủ</a>
+                    <a href="product.html" class="text-gray-600 hover:text-primary font-medium transition">Sản Phẩm</a>
+                    <a href="history.html" class="text-gray-600 hover:text-primary font-medium transition">Tra Cứu Đơn</a>
+                </nav>
+                
+                <div class="flex items-center gap-4">
+                    <form action="product.html" method="GET" class="hidden md:block relative">
+                        <input type="text" name="search" placeholder="Tìm tên máy..." class="pl-4 pr-10 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-primary w-64 text-sm">
+                        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary"><i class="fas fa-search"></i></button>
+                    </form>
+
+                    <a href="cart.html" class="relative text-primary font-bold transition">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span id="cart-badge" class="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                    </a>
+
+                    <div id="auth-section" class="pl-2 border-l border-gray-300 ml-2">
+                        <a href="login.html" class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-full transition">
+                            <i class="fas fa-user-circle text-lg"></i> <span>Đăng nhập</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex-grow">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8 border-l-4 border-primary pl-3">Giỏ Hàng Của Bạn</h1>
+        
+        <div class="flex flex-col lg:flex-row gap-8">
+            <div class="w-full lg:w-2/3">
+                <div id="cart-container" class="bg-white rounded-xl shadow-sm p-6">
+                    </div>
+                
+                <div id="empty-cart" class="hidden text-center py-12 bg-white rounded-xl shadow-sm">
+                    <i class="fas fa-shopping-basket text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-lg mb-6">Giỏ hàng của bạn đang trống!</p>
+                    <a href="product.html" class="inline-block px-8 py-3 bg-primary text-white font-bold rounded-lg hover:bg-red-700 transition">Mua sắm ngay</a>
+                </div>
+            </div>
+
+            <div class="w-full lg:w-1/3">
+                <div class="bg-white rounded-xl shadow-sm p-6 sticky top-24">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6 border-b pb-4">Cộng Giỏ Hàng</h3>
+                    
+                    <div class="flex justify-between mb-4 text-gray-600">
+                        <span>Tạm tính:</span>
+                        <span id="sub-total" class="font-medium">0đ</span>
+                    </div>
+                    <div class="flex justify-between mb-6 text-gray-600">
+                        <span>Phí vận chuyển:</span>
+                        <span class="text-green-600 font-medium">Miễn phí</span>
+                    </div>
+                    
+                    <div class="border-t pt-4 mb-6 flex justify-between items-center">
+                        <span class="font-bold text-lg text-gray-800">Tổng cộng:</span>
+                        <span id="total-price" class="font-bold text-2xl text-primary">0đ</span>
+                    </div>
+
+                    <button onclick="goToPayment()" class="w-full py-4 bg-primary text-white font-bold rounded-lg hover:bg-red-700 transition shadow-lg shadow-red-200 uppercase tracking-wide">
+                        Tiến Hành Thanh Toán
+                    </button>
+                    
+                    <a href="product.html" class="block text-center mt-4 text-sm text-gray-500 hover:text-primary transition">
+                        <i class="fas fa-arrow-left mr-1"></i> Tiếp tục mua sắm
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 text-white py-8 text-center mt-auto">&copy; 2025 Laptop Store. All rights reserved.</footer>
+
+    <script>
+        // 1. DATA (ĐỒNG BỘ VỚI HOME/PRODUCT)
+        const productsDB = [
+            { id: 1, name: 'Dell XPS 13 Plus 9320', price: 35990000, img: 'https://images.unsplash.com/photo-1593642632823-8f78536788c6?auto=format&fit=crop&w=400&q=80' },
+            { id: 2, name: 'MacBook Air M2 2023', price: 26990000, img: 'https://images.unsplash.com/photo-1611186871348-640e087f15d0?auto=format&fit=crop&w=400&q=80' },
+            { id: 3, name: 'Asus ROG Strix G15', price: 32490000, img: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=400&q=80' },
+            { id: 4, name: 'Lenovo Legion 5 Pro', price: 38990000, img: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=400&q=80' },
+            { id: 5, name: 'HP Envy 13 ba1536TU', price: 19990000, img: 'https://images.unsplash.com/photo-1544731612-de7f96afe55f?auto=format&fit=crop&w=400&q=80' },
+            { id: 6, name: 'Acer Nitro 5 Tiger', price: 21490000, img: 'https://images.unsplash.com/photo-1542393545-facac42e679e?auto=format&fit=crop&w=400&q=80' },
+            { id: 7, name: 'MacBook Pro 14 M3', price: 45990000, img: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca4?auto=format&fit=crop&w=400&q=80' },
+            { id: 8, name: 'LG Gram 16 2024', price: 29990000, img: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=400&q=80' }
+        ];
+
+        // 2. RENDER CART
+        function renderCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const container = document.getElementById('cart-container');
+            const emptyState = document.getElementById('empty-cart');
+            
+            container.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                container.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                document.getElementById('total-price').innerText = '0đ';
+                document.getElementById('sub-total').innerText = '0đ';
+                updateCartBadge();
+                return;
+            }
+
+            container.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            cart.forEach((item, index) => {
+                // Tìm thông tin sản phẩm từ DB dựa vào ID
+                // Lưu ý: item.id từ localStorage có thể là string, p.id là number -> dùng == để so sánh
+                const product = productsDB.find(p => p.id == item.id);
+                
+                if (product) {
+                    const lineTotal = product.price * item.qty;
+                    total += lineTotal;
+
+                    container.insertAdjacentHTML('beforeend', `
+                        <div class="flex flex-col sm:flex-row items-center gap-4 py-6 border-b border-gray-100 last:border-0">
+                            <img src="${product.img}" alt="${product.name}" class="w-24 h-24 object-cover rounded-lg border border-gray-200">
+                            
+                            <div class="flex-1 text-center sm:text-left">
+                                <h3 class="font-bold text-gray-800 text-lg mb-1">${product.name}</h3>
+                                <p class="text-sm text-gray-500">Mã SP: #${product.id}</p>
+                            </div>
+
+                            <div class="text-primary font-bold text-lg w-32 text-center">
+                                ${product.price.toLocaleString('vi-VN')}đ
+                            </div>
+
+                            <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                                <button onclick="changeQty(${item.id}, -1)" class="px-3 py-1 bg-gray-50 hover:bg-gray-200 transition text-gray-600">-</button>
+                                <span class="px-3 py-1 font-medium text-gray-800 w-10 text-center">${item.qty}</span>
+                                <button onclick="changeQty(${item.id}, 1)" class="px-3 py-1 bg-gray-50 hover:bg-gray-200 transition text-gray-600">+</button>
+                            </div>
+
+                            <button onclick="removeItem(${item.id})" class="text-gray-400 hover:text-red-600 transition w-8 text-center" title="Xóa">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    `);
+                }
+            });
+
+            // Cập nhật tổng tiền
+            const formattedTotal = total.toLocaleString('vi-VN') + 'đ';
+            document.getElementById('total-price').innerText = formattedTotal;
+            document.getElementById('sub-total').innerText = formattedTotal;
+            updateCartBadge();
+        }
+
+        // 3. CART ACTIONS
+        function changeQty(id, delta) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const item = cart.find(i => i.id == id);
+            
+            if (item) {
+                item.qty += delta;
+                if (item.qty <= 0) {
+                    cart = cart.filter(i => i.id != id);
+                }
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+            }
+        }
+
+        function removeItem(id) {
+            Swal.fire({
+                title: 'Xóa sản phẩm?',
+                text: "Bạn có chắc muốn xóa sản phẩm này khỏi giỏ?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                    cart = cart.filter(i => i.id != id);
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    renderCart();
+                    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
+                    Toast.fire({ icon: 'success', title: 'Đã xóa sản phẩm' });
+                }
+            });
+        }
+
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const count = cart.reduce((sum, i) => sum + i.qty, 0);
+            const badge = document.getElementById('cart-badge');
+            badge.innerText = count;
+            count > 0 ? badge.classList.remove('hidden') : badge.classList.add('hidden');
+        }
+
+        function goToPayment() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0) {
+                Swal.fire('Giỏ hàng trống', 'Vui lòng chọn sản phẩm trước khi thanh toán.', 'info');
+                return;
+            }
+            
+            // Kiểm tra đăng nhập trước khi thanh toán
+            const user = localStorage.getItem('currentUser');
+            if (!user) {
+                Swal.fire({
+                    title: 'Chưa đăng nhập',
+                    text: "Vui lòng đăng nhập để tiến hành thanh toán.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#DC2626',
+                    confirmButtonText: 'Đăng nhập ngay',
+                    cancelButtonText: 'Để sau'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'login.html';
+                    }
+                });
+            } else {
+                window.location.href = 'payment.html';
+            }
+        }
+
+        // 4. AUTH HEADER (Giống Home/Product/Detail)
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCart();
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (user) {
+                const link = user.role === 'admin' ? '../Admin/admin.html' : 'user.html';
+                const label = user.role === 'admin' ? 'Admin' : user.name.split(' ').pop();
+                document.getElementById('auth-section').innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <a href="${link}" class="flex items-center gap-2 group">
+                            <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-primary font-bold border border-red-200">${user.name.charAt(0)}</div>
+                            <span class="hidden md:inline text-sm font-bold text-gray-700 group-hover:text-primary">Chào, ${label}</span>
+                        </a>
+                        <button onclick="logout()" class="text-gray-400 hover:text-red-600"><i class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                `;
+            }
+        });
+
+        function logout() {
+            Swal.fire({ title: 'Đăng xuất?', showCancelButton: true, confirmButtonText: 'Đồng ý', confirmButtonColor: '#DC2626' }).then((r) => {
+                if (r.isConfirmed) { localStorage.removeItem('currentUser'); window.location.reload(); }
+            });
+        }
+    </script>
+</body>
+</html>

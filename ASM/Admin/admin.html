@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Tổng Quan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="min-h-screen flex flex-col md:flex-row">
+   <aside class="w-full md:w-64 bg-white shadow-xl md:h-screen md:fixed z-10">
+    <div class="h-16 flex items-center justify-center border-b bg-red-600">
+        <h2 class="text-2xl font-bold text-white">ADMIN PANEL</h2>
+    </div>
+
+    <nav class="p-4 space-y-2">
+        <a href="../User/home.html" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100 hover:text-red-600 rounded-lg transition mb-4 border border-gray-200 shadow-sm">
+            <i class="fas fa-arrow-left w-6"></i> 
+            <span class="font-bold">Về Trang Bán Hàng</span>
+        </a>
+        
+        <hr class="border-gray-200 mb-4">
+        
+        <a href="admin.html" class="flex items-center px-4 py-3 bg-red-50 text-red-600 rounded-lg font-bold border border-red-100 shadow-sm">
+            <i class="fas fa-chart-line w-6"></i> 
+            <span>Tổng Quan</span>
+        </a>
+        <a href="admin_product.html" class="nav-item flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-red-600 rounded-lg transition">
+            <i class="fas fa-box-open w-6"></i> 
+            <span>Quản Lý Sản Phẩm</span>
+        </a>
+
+        <a href="order.html" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-red-600 rounded-lg transition">
+            <i class="fas fa-shopping-bag w-6"></i> 
+            <span>Quản Lý Đơn Hàng</span>
+        </a>
+    </nav>
+</aside>
+        <main class="flex-1 md:ml-64 p-6">
+            <h1 class="text-3xl font-bold mb-8 text-gray-800">Thống Kê Tổng Quan</h1>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <div class="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-red-500"><p class="text-gray-500 text-sm">DOANH THU</p><p class="text-3xl font-bold">22.3 tỷ</p></div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-blue-500"><p class="text-gray-500 text-sm">ĐƠN HÀNG</p><p class="text-3xl font-bold">1,234</p></div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-green-500"><p class="text-gray-500 text-sm">KHÁCH HÀNG</p><p class="text-3xl font-bold">5,600</p></div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-yellow-500"><p class="text-gray-500 text-sm">CHỜ XỬ LÝ</p><p class="text-3xl font-bold">12</p></div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-2xl shadow-lg"><h3 class="font-bold mb-4">Biểu Đồ Doanh Thu</h3><canvas id="revenueChart"></canvas></div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg"><h3 class="font-bold mb-4">Đơn Hàng Tuần Này</h3><canvas id="ordersChart"></canvas></div>
+            </div>
+        </main>
+    </div>
+    <script>
+        const path = window.location.pathname;
+    const navLinks = document.querySelectorAll('.nav-item');
+    navLinks.forEach(link => {
+        if(path.includes(link.getAttribute('href'))) {
+            link.className = 'nav-item flex items-center px-4 py-3 bg-red-50 text-red-600 rounded-lg font-bold border border-red-100 shadow-sm';
+        }
+    });
+        // Fake Chart
+        new Chart(document.getElementById('revenueChart'), {type: 'line', data: {labels: ['T2','T3','T4','T5','T6','T7','CN'], datasets: [{label: 'Triệu đồng', data: [12,19,3,5,2,3,20], borderColor: '#ef4444', tension: 0.4, fill: true, backgroundColor: 'rgba(239, 68, 68, 0.1)'}]}});
+        new Chart(document.getElementById('ordersChart'), {type: 'bar', data: {labels: ['T2','T3','T4','T5','T6','T7','CN'], datasets: [{label: 'Đơn hàng', data: [5,10,8,12,6,9,4], backgroundColor: '#3b82f6'}]}});
+    </script>
+</body>
+</html>

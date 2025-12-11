@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bán Laptop - Thanh Toán</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#DC2626',
+                        secondary: '#F3F4F6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-secondary font-sans antialiased">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="home.html" class="text-2xl font-bold text-primary">LAPTOP STORE</a>
+            <nav class="hidden md:flex space-x-6">
+                <a href="home.html" class="text-gray-700 hover:text-primary">Trang Chủ</a>
+                <a href="product.html" class="text-gray-700 hover:text-primary">Sản Phẩm</a>
+                <a href="history.html" class="text-gray-700 hover:text-primary">Lịch Sử Đơn</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="mb-6">
+            <a href="cart.html" class="text-gray-500 hover:text-primary text-sm mb-2 inline-block"><i class="fas fa-arrow-left"></i> Quay lại giỏ hàng</a>
+            <h1 class="text-2xl font-bold text-gray-800">Thanh toán & Đặt hàng</h1>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-7">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                    <h2 class="text-lg font-bold text-gray-800 mb-6 pb-2 border-b">1. Thông tin giao hàng</h2>
+                    <form id="order-form" class="space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div><label class="block text-sm font-medium mb-1 text-gray-600">Họ tên *</label><input id="name" type="text" class="w-full px-4 py-2 border rounded-lg focus:border-primary focus:outline-none transition"></div>
+                            <div><label class="block text-sm font-medium mb-1 text-gray-600">Số điện thoại *</label><input id="phone" type="tel" class="w-full px-4 py-2 border rounded-lg focus:border-primary focus:outline-none transition"></div>
+                        </div>
+                        <div><label class="block text-sm font-medium mb-1 text-gray-600">Email *</label><input id="email" type="email" class="w-full px-4 py-2 border rounded-lg bg-gray-50" readonly></div>
+                        <div><label class="block text-sm font-medium mb-1 text-gray-600">Địa chỉ nhận hàng *</label><textarea id="address" rows="2" class="w-full px-4 py-2 border rounded-lg focus:border-primary focus:outline-none transition"></textarea></div>
+                        <div><label class="block text-sm font-medium mb-1 text-gray-600">Ghi chú đơn hàng</label><input id="note" type="text" class="w-full px-4 py-2 border rounded-lg focus:border-primary focus:outline-none transition"></div>
+
+                        <div class="pt-6 border-t mt-6">
+                            <h2 class="text-lg font-bold text-gray-800 mb-4">2. Phương thức thanh toán</h2>
+                            <div class="space-y-3">
+                                <label class="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition relative group">
+                                    <input type="radio" name="paymentMethod" value="cod" class="mt-1 w-4 h-4 text-primary accent-red-600" checked>
+                                    <div class="ml-3">
+                                        <span class="block font-bold text-gray-800">Thanh toán khi nhận hàng (COD)</span>
+                                        <span class="text-sm text-gray-500">Bạn chỉ phải thanh toán khi đã nhận được hàng.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition relative group">
+                                    <input type="radio" name="paymentMethod" value="banking" class="mt-1 w-4 h-4 text-primary accent-red-600">
+                                    <div class="ml-3 w-full">
+                                        <span class="block font-bold text-gray-800">Chuyển khoản ngân hàng (VietQR)</span>
+                                        <span class="text-sm text-gray-500">Quét mã QR để thanh toán nhanh chóng.</span>
+                                        
+                                        <div id="qr-section" class="hidden mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 text-center animate-fade-in">
+                                            <p class="text-sm font-bold text-primary mb-2">Quét mã để thanh toán:</p>
+                                            <div id="qrcode-img" class="flex justify-center mb-2">
+                                                <div class="animate-pulse w-48 h-48 bg-gray-300 rounded"></div>
+                                            </div>
+                                            <p class="text-xs text-gray-500">Ngân hàng: <b>MB Bank</b> <br> Chủ TK: <b>NGUYEN VAN A</b></p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-24">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b">Đơn hàng của bạn</h2>
+                    
+                    <div id="order-items" class="space-y-3 mb-6 max-h-60 overflow-y-auto pr-2 scrollbar-thin">
+                        </div>
+
+                    <div class="space-y-2 pt-4 border-t border-gray-100 text-sm">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Tạm tính:</span>
+                            <span id="sub-total" class="font-medium">0đ</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Phí vận chuyển:</span>
+                            <span class="text-green-600 font-medium">Miễn phí</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 mt-4 border-t border-gray-200">
+                        <span class="text-lg font-bold text-gray-800">Tổng cộng:</span>
+                        <span class="text-2xl font-bold text-primary" id="total-price">0đ</span>
+                    </div>
+
+                    <button onclick="submitOrder()" class="w-full mt-6 bg-primary hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:-translate-y-1">
+                        XÁC NHẬN ĐẶT HÀNG
+                    </button>
+                    
+                    <p class="text-xs text-center text-gray-400 mt-4"><i class="fas fa-shield-alt"></i> Thông tin được bảo mật tuyệt đối</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 text-white py-8 text-center mt-12">&copy; 2025 Laptop Store. All rights reserved.</footer>
+
+    <script>
+        // DATA SẢN PHẨM ĐỂ TÍNH TIỀN
+        const productsDB = [
+            { id: 1, name: 'Dell XPS 13 Plus 9320', price: 35990000 },
+            { id: 2, name: 'MacBook Air M2 2023', price: 26990000 },
+            { id: 3, name: 'Asus ROG Strix G15', price: 32490000 },
+            { id: 4, name: 'Lenovo Legion 5 Pro', price: 38990000 },
+            { id: 5, name: 'HP Envy 13 ba1536TU', price: 19990000 },
+            { id: 6, name: 'Acer Nitro 5 Tiger', price: 21490000 },
+            { id: 7, name: 'MacBook Pro 14 M3', price: 45990000 },
+            { id: 8, name: 'LG Gram 16 2024', price: 29990000 }
+        ];
+
+        let cart = [];
+        let totalAmount = 0;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Check Login
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user) {
+                Swal.fire({ title: 'Vui lòng đăng nhập!', icon: 'warning', confirmButtonColor: '#DC2626' }).then(() => window.location.href = 'login.html');
+                return;
+            }
+            
+            // 2. Điền thông tin
+            document.getElementById('name').value = user.name;
+            document.getElementById('email').value = user.email;
+            if(user.phone) document.getElementById('phone').value = user.phone;
+            if(user.address) document.getElementById('address').value = user.address;
+
+            // 3. Load Cart
+            cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0) {
+                window.location.href = 'product.html';
+                return;
+            }
+
+            // 4. Render Items & Calc Total
+            const itemsContainer = document.getElementById('order-items');
+            itemsContainer.innerHTML = '';
+            
+            cart.forEach(item => {
+                const product = productsDB.find(p => p.id == item.id);
+                if(product) {
+                    const lineTotal = product.price * item.qty;
+                    totalAmount += lineTotal;
+                    itemsContainer.innerHTML += `
+                        <div class="flex justify-between items-start text-sm">
+                            <div class="flex-1 pr-2">
+                                <p class="font-medium text-gray-800 line-clamp-1">${product.name}</p>
+                                <p class="text-xs text-gray-500">x${item.qty}</p>
+                            </div>
+                            <span class="font-bold text-gray-700">${lineTotal.toLocaleString('vi-VN')}đ</span>
+                        </div>
+                    `;
+                }
+            });
+
+            document.getElementById('sub-total').innerText = totalAmount.toLocaleString('vi-VN') + 'đ';
+            document.getElementById('total-price').innerText = totalAmount.toLocaleString('vi-VN') + 'đ';
+
+            // 5. Xử lý sự kiện chọn thanh toán
+            const paymentMethods = document.querySelectorAll('input[name="paymentMethod"]');
+            paymentMethods.forEach(method => {
+                method.addEventListener('change', (e) => {
+                    const qrSection = document.getElementById('qr-section');
+                    if (e.target.value === 'banking') {
+                        qrSection.classList.remove('hidden');
+                        generateVietQR(); // Tạo mã QR
+                    } else {
+                        qrSection.classList.add('hidden');
+                    }
+                });
+            });
+        });
+
+        // HÀM TẠO MÃ VIETQR (Dùng API xịn)
+        function generateVietQR() {
+            // Cấu hình tài khoản nhận tiền (Demo)
+            const BANK_ID = 'MB'; // Ngân hàng MB (hoặc VCB, TCB...)
+            const ACCOUNT_NO = '0909123456'; // Số tài khoản demo
+            const TEMPLATE = 'compact2'; // Mẫu QR gọn đẹp
+            const AMOUNT = totalAmount;
+            const DESCRIPTION = 'Thanh toan don hang';
+
+            // Link API VietQR
+            const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-${TEMPLATE}.png?amount=${AMOUNT}&addInfo=${encodeURIComponent(DESCRIPTION)}`;
+            
+            // Hiển thị ảnh
+            document.getElementById('qrcode-img').innerHTML = `<img src="${qrUrl}" alt="QR Code" class="w-48 h-auto rounded shadow-sm border">`;
+        }
+
+        // XỬ LÝ ĐẶT HÀNG
+        function submitOrder() {
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const note = document.getElementById('note').value.trim();
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+
+            // Validate
+            if (!name || !phone || !address) {
+                Swal.fire('Thiếu thông tin', 'Vui lòng điền họ tên, số điện thoại và địa chỉ.', 'warning');
+                return;
+            }
+
+            // Tạo đơn hàng object
+            const newOrder = {
+                id: '#DH' + Math.floor(100000 + Math.random() * 900000), // Mã ngẫu nhiên 6 số
+                userEmail: user.email, // Để map với user
+                customerName: name,
+                phone: phone,
+                address: address,
+                note: note,
+                date: new Date().toLocaleString('vi-VN'), // Ngày giờ hiện tại
+                total: totalAmount.toLocaleString('vi-VN') + 'đ',
+                status: 'pending', // Mặc định chờ xử lý
+                paymentMethod: paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng' : 'Chuyển khoản',
+                items: cart // Lưu danh sách sp
+            };
+
+            // Lưu vào LocalStorage (ALL_ORDERS)
+            let allOrders = JSON.parse(localStorage.getItem('ALL_ORDERS')) || [];
+            allOrders.unshift(newOrder); // Thêm vào đầu
+            localStorage.setItem('ALL_ORDERS', JSON.stringify(allOrders));
+
+            // Xóa giỏ hàng
+            localStorage.removeItem('cart');
+
+            // Thông báo thành công
+            Swal.fire({
+                icon: 'success',
+                title: 'Đặt hàng thành công!',
+                text: `Mã đơn hàng: ${newOrder.id}`,
+                confirmButtonColor: '#DC2626',
+                confirmButtonText: 'Xem đơn hàng'
+            }).then(() => {
+                window.location.href = 'history.html';
+            });
+        }
+    </script>
+</body>
+</html>

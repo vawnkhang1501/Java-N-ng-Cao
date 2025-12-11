@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Đơn Hàng - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>.custom-select { -webkit-appearance: none; appearance: none; text-align-last: center; }</style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="min-h-screen flex flex-col md:flex-row">
+       <aside class="w-full md:w-64 bg-white shadow-xl md:h-screen md:fixed z-10">
+    <div class="h-16 flex items-center justify-center border-b bg-red-600">
+        <h2 class="text-2xl font-bold text-white">ADMIN PANEL</h2>
+    </div>
+
+    <nav class="p-4 space-y-2">
+        <a href="../User/home.html" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-100 hover:text-red-600 rounded-lg transition mb-4 border border-gray-200 shadow-sm">
+            <i class="fas fa-arrow-left w-6"></i> 
+            <span class="font-bold">Về Trang Bán Hàng</span>
+        </a>
+        
+        <hr class="border-gray-200 mb-4">
+        
+        <a href="admin.html" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-red-600 rounded-lg transition">
+            <i class="fas fa-chart-line w-6"></i> 
+            <span>Tổng Quan</span>
+        </a>
+        <a href="admin_product.html" class="nav-item flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-red-600 rounded-lg transition">
+            <i class="fas fa-box-open w-6"></i> 
+            <span>Quản Lý Sản Phẩm</span>
+        </a>
+
+        <a href="order.html" class="flex items-center px-4 py-3 bg-red-50 text-red-600 rounded-lg font-bold border border-red-100 shadow-sm">
+            <i class="fas fa-shopping-bag w-6"></i> 
+            <span>Quản Lý Đơn Hàng</span>
+        </a>
+    </nav>
+</aside>
+
+        <main class="flex-1 md:ml-64 p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">Quản Lý Đơn Hàng</h1>
+                <button onclick="clearData()" class="text-red-500 underline text-sm">Reset Dữ Liệu</button>
+            </div>
+
+            <div class="bg-white p-4 rounded-t-xl border-b flex flex-wrap gap-2 shadow-sm">
+                 <button onclick="filterOrders('all')" id="btn-all" class="filter-btn px-4 py-2 rounded-lg bg-red-50 text-red-600 font-bold text-sm border border-red-200">Tất cả</button>
+                 <button onclick="filterOrders('pending')" id="btn-pending" class="filter-btn px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 text-sm">Chờ xử lý</button>
+                 <button onclick="filterOrders('shipping')" id="btn-shipping" class="filter-btn px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 text-sm">Đang giao</button>
+                 <button onclick="filterOrders('completed')" id="btn-completed" class="filter-btn px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 text-sm">Hoàn thành</button>
+                 <button onclick="filterOrders('cancelled')" id="btn-cancelled" class="filter-btn px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 text-sm">Đã hủy</button>
+            </div>
+
+            <div class="bg-white rounded-b-xl shadow-lg overflow-hidden min-h-[400px]">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-50 text-gray-600 uppercase font-semibold border-b">
+                        <tr><th class="px-6 py-4">Mã</th><th class="px-6 py-4">Khách Hàng</th><th class="px-6 py-4 text-center">Trạng Thái</th><th class="px-6 py-4 text-right">Tổng Tiền</th><th class="px-6 py-4 text-center">Hành Động</th></tr>
+                    </thead>
+                    <tbody id="orderTableBody"></tbody>
+                </table>
+                <div id="emptyState" class="hidden flex-col items-center justify-center py-12"><p class="text-gray-500">Không tìm thấy đơn hàng.</p></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const path = window.location.pathname;
+    const navLinks = document.querySelectorAll('.nav-item');
+    navLinks.forEach(link => {
+        if(path.includes(link.getAttribute('href'))) {
+            link.className = 'nav-item flex items-center px-4 py-3 bg-red-50 text-red-600 rounded-lg font-bold border border-red-100 shadow-sm';
+        }
+    });
+        const statusConfig = {
+            'pending': { label: 'Chờ xử lý', class: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+            'shipping': { label: 'Đang giao', class: 'bg-blue-100 text-blue-700 border-blue-200' },
+            'completed': { label: 'Hoàn thành', class: 'bg-green-100 text-green-700 border-green-200' },
+            'cancelled': { label: 'Đã hủy', class: 'bg-red-100 text-red-700 border-red-200' }
+        };
+
+        let allOrders = [];
+        let currentFilter = 'all';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            allOrders = JSON.parse(localStorage.getItem('ALL_ORDERS')) || [];
+            renderTable();
+        });
+
+        function renderTable() {
+            const tbody = document.getElementById('orderTableBody');
+            tbody.innerHTML = '';
+            
+            // Lọc dữ liệu
+            const filteredData = currentFilter === 'all' ? allOrders : allOrders.filter(o => o.status === currentFilter);
+
+            if (filteredData.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('emptyState').classList.add('flex');
+                return;
+            }
+            document.getElementById('emptyState').classList.add('hidden');
+
+            filteredData.forEach((order) => {
+                // Tìm index thực trong mảng gốc để update
+                const realIndex = allOrders.findIndex(o => o.id === order.id);
+                const st = statusConfig[order.status];
+                
+                const options = `
+                    <option value="pending" ${order.status==='pending'?'selected':''}>Chờ xử lý</option>
+                    <option value="shipping" ${order.status==='shipping'?'selected':''}>Đang giao</option>
+                    <option value="completed" ${order.status==='completed'?'selected':''}>Hoàn thành</option>
+                    <option value="cancelled" ${order.status==='cancelled'?'selected':''}>Hủy đơn</option>
+                `;
+
+                const row = `
+                    <tr class="hover:bg-gray-50 transition border-b">
+                        <td class="px-6 py-4 font-bold text-red-600">${order.id}</td>
+                        <td class="px-6 py-4">
+                            <p class="font-bold text-gray-800">${order.customerName}</p>
+                            <p class="text-xs text-gray-500">${order.phone}</p>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <select onchange="updateStatus(${realIndex}, this.value)" class="custom-select px-3 py-1 rounded-full text-xs font-bold border outline-none ${st.class}">
+                                ${options}
+                            </select>
+                        </td>
+                        <td class="px-6 py-4 text-right font-bold">${order.total}</td>
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="deleteOrder(${realIndex})" class="text-red-500 hover:text-red-700 bg-red-50 p-2 rounded-full"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        function updateStatus(index, newStatus) {
+            allOrders[index].status = newStatus;
+            localStorage.setItem('ALL_ORDERS', JSON.stringify(allOrders));
+            const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1000 });
+            Toast.fire({ icon: 'success', title: 'Đã cập nhật' });
+            renderTable();
+        }
+
+        function deleteOrder(index) {
+            if(confirm('Xóa đơn hàng này?')) {
+                allOrders.splice(index, 1);
+                localStorage.setItem('ALL_ORDERS', JSON.stringify(allOrders));
+                renderTable();
+            }
+        }
+
+        function filterOrders(status) {
+            currentFilter = status;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.className='filter-btn px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 text-sm');
+            document.getElementById('btn-'+status).className='filter-btn px-4 py-2 rounded-lg bg-red-50 text-red-600 font-bold text-sm border border-red-200';
+            renderTable();
+        }
+
+        function clearData() {
+            if(confirm('Xóa sạch database đơn hàng?')) { localStorage.removeItem('ALL_ORDERS'); location.reload(); }
+        }
+    </script>
+</body>
+</html>
